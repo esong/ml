@@ -2,7 +2,8 @@ ml
 ==
 
 ever come across a problem you don't know how to solve?
-wish there was a way to make everything easy?
+
+wish there was a way to make everything easier?
 
 the answer is simple: ml
 
