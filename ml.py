@@ -11,10 +11,10 @@ class Trainer(object):
 		print(extraMsg)
 		exit(1)
 
-	def trainForever(self, hadoop, numIterations, defect = False):
+	def train(self, hadoop, numIterations, defect = False):
 		i = 0
 		while numIterations == -1 or i < numIterations:
-			if defect and math.log10(random.randint(1, i+1)) > random.randint(2,4):
+			if defect and math.log10(random.randint(1, i+1)) > random.randint(2,4) and hadoop:
 				Trainer().trainingFailed("hadoop crashed, that's too bad")
 				exit(1)
 			print i,
@@ -42,18 +42,26 @@ class ml(object):
 
 	def __init__(self, args):
 		self._TRAINING_FILE = os.stat(args.trainingData)
-		self._HADOOP = bool(args.hadoop)
+		self._HADOOP = args.hadoop.lower() in ("yes", "true", "t", "1")
 		self._NUM_ITERATIONS = int(args.iterations)
 		random.seed()
 
-	def checkFileSize(self):
+	def pretrainingChecks(self):
 		if self._TRAINING_FILE.st_size < self._DEFAULT_MINIMUM_FILE_SIZE/random.randint(1,100):
-			self.trainer.trainingFailed("i can't train on this data, please give me more.")
+			self.trainer.trainingFailed("i can't train on this data, please give me more..")
+
+		if self._NUM_ITERATIONS > 0 and self._NUM_ITERATIONS < 1000:
+			self.trainer.trainingFailed("do you really expect to achieve perfection with that little iterations? ..")
 
 	def main(self):
-		self.checkFileSize()
-		print("truly thinking like an ml'er. starting up the training.")
-		self.trainer.trainForever(self._HADOOP, self._NUM_ITERATIONS, True)
+		try:
+			self.pretrainingChecks()
+			print("truly thinking like an ml'er. starting up the training:")
+			self.trainer.train(self._HADOOP, self._NUM_ITERATIONS, True)
+		except KeyboardInterrupt:
+			print("\none cannot simply stop machine learning..")
+			self._DEFAULT_MINIMUM_FILE_SIZE = 0
+			self.main()
 
 if __name__ == '__main__':
     ml(ArgsParser().getArgs()).main()
