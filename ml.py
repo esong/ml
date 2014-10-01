@@ -17,7 +17,7 @@ class Trainer(object):
 		j = 0
 		while numIterations == -1 or i < numIterations:
 			if defect and math.log10(random.randint(1, i+1)) > random.randint(2,4) and hadoop:
-				Trainer().trainingFailed("hadoop crashed, that's too bad")
+				self.trainingFailed("hadoop crashed, that's too bad")
 				exit(1)
 			if hadoop:
 				if random.randint(1,10) > 7:
