@@ -13,11 +13,17 @@ class Trainer(object):
 
 	def train(self, hadoop, numIterations, defect = False):
 		i = 0
+		j = 0
 		while numIterations == -1 or i < numIterations:
 			if defect and math.log10(random.randint(1, i+1)) > random.randint(2,4) and hadoop:
 				Trainer().trainingFailed("hadoop crashed, that's too bad")
 				exit(1)
-			print i,
+			if hadoop:
+				if random.randint(1,10) > 7:
+					j += 1
+				print "Mapper: {0}, Reducer: {1}".format(i, j),
+			else:
+				print i,
 			i += 1
 			sys.stdout.flush()
 			time.sleep(float(i)/1000)
