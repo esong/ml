@@ -3,6 +3,7 @@ import math
 import os
 import random
 import sys
+import subprocess
 import time
 
 class Trainer(object):
@@ -43,6 +44,7 @@ class ml(object):
 	_TRAINING_FILE = None
 	_HADOOP = True
 	_NUM_ITERATIONS = -1
+	_PROCESS_NAME = ""
 
 	trainer = Trainer()
 
@@ -53,9 +55,15 @@ class ml(object):
 			self.trainer.trainingFailed("how can i learn without any training? ..")
 		self._HADOOP = args.hadoop.lower() in ("yes", "true", "t", "1")
 		self._NUM_ITERATIONS = int(args.iterations)
+		self._PROCESS_NAME = sys.argv[0]
 		random.seed()
 
 	def pretrainingChecks(self):
+		oneInstanceCheck = subprocess.Popen("ps -ef | grep {0} | grep -v grep".format(self._PROCESS_NAME), shell=True, stdout=subprocess.PIPE)
+		oneInstanceCheckResult = oneInstanceCheck.stdout.read()
+		if oneInstanceCheckResult.count("\n") > 1:
+			self.trainer.trainingFailed("don't try to cheat, ml isn't that easy..")
+
 		if self._TRAINING_FILE.st_size < self._DEFAULT_MINIMUM_FILE_SIZE/random.randint(1,100):
 			self.trainer.trainingFailed("i can't train on this data, please give me more..")
 
