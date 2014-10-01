@@ -2,6 +2,7 @@ import argparse
 import math
 import os
 import random
+import signal
 import sys
 import time
 
@@ -21,7 +22,7 @@ class Trainer(object):
 			if hadoop:
 				if random.randint(1,10) > 7:
 					j += 1
-				print "mappers: {0}, reducers: {1}".format(i, j),
+				print "finished mappers: {0}, finished reducers: {1}".format(i, j),
 			else:
 				print i,
 			i += 1
@@ -55,22 +56,28 @@ class ml(object):
 		self._NUM_ITERATIONS = int(args.iterations)
 		random.seed()
 
+	def signalHandler(self, inputSignal, frame):
+		if inputSignal == signal.SIGTERM: 
+			print("\nnice try, but you cannot just stop machine learning...")
+		else:
+			#Debug line
+			#exit(1)
+			print("\none cannot simply stop machine learning..")
+
 	def pretrainingChecks(self):
 		if self._TRAINING_FILE.st_size < self._DEFAULT_MINIMUM_FILE_SIZE/random.randint(1,100):
 			self.trainer.trainingFailed("i can't train on this data, please give me more..")
 
 		if self._NUM_ITERATIONS > 0 and self._NUM_ITERATIONS < 1000:
-			self.trainer.trainingFailed("do you really expect to achieve perfection with that little iterations? ..")
+			self.trainer.trainingFailed("do you really expect to achieve perfection with almost no iterations? ..")
 
 	def main(self):
-		try:
-			self.pretrainingChecks()
-			print("truly thinking like an ml'er. starting up the training:")
-			self.trainer.train(self._HADOOP, self._NUM_ITERATIONS, True)
-		except KeyboardInterrupt:
-			print("\none cannot simply stop machine learning..")
-			self._DEFAULT_MINIMUM_FILE_SIZE = 0
-			self.main()
+		signal.signal(signal.SIGTERM, self.signalHandler)
+		signal.signal(signal.SIGINT, self.signalHandler)
+
+		self.pretrainingChecks()
+		print("truly thinking like an ml'er. starting up the training:")
+		self.trainer.train(self._HADOOP, self._NUM_ITERATIONS, True)
 
 if __name__ == '__main__':
     ml(ArgsParser().getArgs()).main()
