@@ -26,7 +26,7 @@ class Trainer(object):
 class ArgsParser(object):
 	def getArgs(self):
 		parser = argparse.ArgumentParser(description='the power of ml in one little script')
-		parser.add_argument('--training_data', dest='trainingData', help='data for training', required=True)
+		parser.add_argument('--training_data', dest='trainingData', help='data for training')
 		parser.add_argument('--hadoop', dest="hadoop", help="use hadoop?", default=True)
 		parser.add_argument('--iterations', dest="iterations", help='number of iterations', default=-1)
 		return parser.parse_args()
@@ -41,7 +41,10 @@ class ml(object):
 	trainer = Trainer()
 
 	def __init__(self, args):
-		self._TRAINING_FILE = os.stat(args.trainingData)
+		try:
+			self._TRAINING_FILE = os.stat(args.trainingData)
+		except:
+			self.trainer.trainingFailed("how can i learn without any training? ..")
 		self._HADOOP = args.hadoop.lower() in ("yes", "true", "t", "1")
 		self._NUM_ITERATIONS = int(args.iterations)
 		random.seed()
