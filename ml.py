@@ -21,7 +21,7 @@ class Trainer(object):
 			if hadoop:
 				if random.randint(1,10) > 7:
 					j += 1
-				print "Mapper: {0}, Reducer: {1}".format(i, j),
+				print "mappers: {0}, reducers: {1}".format(i, j),
 			else:
 				print i,
 			i += 1
@@ -33,7 +33,7 @@ class ArgsParser(object):
 	def getArgs(self):
 		parser = argparse.ArgumentParser(description='the power of ml in one little script')
 		parser.add_argument('--training_data', dest='trainingData', help='data for training')
-		parser.add_argument('--hadoop', dest="hadoop", help="use hadoop?", default=True)
+		parser.add_argument('--hadoop', dest="hadoop", help="use hadoop?", default='true')
 		parser.add_argument('--iterations', dest="iterations", help='number of iterations', default=-1)
 		return parser.parse_args()
 
