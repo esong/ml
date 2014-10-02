@@ -4,6 +4,7 @@ import os
 import random
 import signal
 import sys
+import subprocess
 import time
 
 class Trainer(object):
@@ -17,7 +18,7 @@ class Trainer(object):
 		j = 0
 		while numIterations == -1 or i < numIterations:
 			if defect and math.log10(random.randint(1, i+1)) > random.randint(2,4) and hadoop:
-				Trainer().trainingFailed("hadoop crashed, that's too bad")
+				self.trainingFailed("hadoop crashed, that's too bad")
 				exit(1)
 			if hadoop:
 				if random.randint(1,10) > 7:
@@ -44,6 +45,7 @@ class ml(object):
 	_TRAINING_FILE = None
 	_HADOOP = True
 	_NUM_ITERATIONS = -1
+	_PROCESS_NAME = ""
 
 	trainer = Trainer()
 
@@ -54,6 +56,7 @@ class ml(object):
 			self.trainer.trainingFailed("how can i learn without any training? ..")
 		self._HADOOP = args.hadoop.lower() in ("yes", "true", "t", "1")
 		self._NUM_ITERATIONS = int(args.iterations)
+		self._PROCESS_NAME = sys.argv[0]
 		random.seed()
 
 	def signalHandler(self, inputSignal, frame):
@@ -65,6 +68,11 @@ class ml(object):
 			print("\none cannot simply stop machine learning..")
 
 	def pretrainingChecks(self):
+		oneInstanceCheck = subprocess.Popen("ps -ef | grep {0} | grep -v grep".format(self._PROCESS_NAME), shell=True, stdout=subprocess.PIPE)
+		oneInstanceCheckResult = oneInstanceCheck.stdout.read()
+		if oneInstanceCheckResult.count("\n") > 1:
+			self.trainer.trainingFailed("don't try to cheat, ml isn't that easy..")
+
 		if self._TRAINING_FILE.st_size < self._DEFAULT_MINIMUM_FILE_SIZE/random.randint(1,100):
 			self.trainer.trainingFailed("i can't train on this data, please give me more..")
 
